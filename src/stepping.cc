@@ -1,4 +1,5 @@
 #include "stepping.hh"
+#include "G4OpticalPhoton.hh"
 
 MySteppingAction::MySteppingAction(MyEventAction *eventAction)
 {
@@ -10,7 +11,10 @@ MySteppingAction::~MySteppingAction()
 
 void MySteppingAction::UserSteppingAction(const G4Step *step)
 {
-  if (step->GetTrack()->GetDefinition()->GetParticleName() == "proton" && step->GetPostStepPoint()->GetProcessDefinedStep() != nullptr ) {
+   static G4ParticleDefinition* opticalphoton =
+    G4OpticalPhoton::OpticalPhotonDefinition();
+
+  if (step->GetTrack()->GetDefinition() == opticalphoton && step->GetPostStepPoint()->GetProcessDefinedStep() != nullptr ) {
      G4AnalysisManager *man = G4AnalysisManager::Instance();
 
      const DetectorConstruction *detectorConstruction = static_cast<const DetectorConstruction*> (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
@@ -62,7 +66,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
         if (step->IsFirstStepInVolume() ){
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_1  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_1  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_1 = postStepPoint->GetMomentumDirection();
            G4double angle_1 = std::acos(p0_1.z());
            G4ThreeVector posPhoton1 = postStepPoint->GetPosition()/cm;
@@ -71,8 +75,8 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(10, angle_1/deg, ekin_1);
 
            man->FillH1(0,  posPhoton1[2]);
-           //man->FillNtupleDColumn(12, 0, angle_1/deg);
-           //man->AddNtupleRow(12);
+           man->FillNtupleDColumn(1, 1, ekin_1);
+           man->AddNtupleRow(1);
 
       /*
 
@@ -94,7 +98,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
         if (step->IsFirstStepInVolume()){
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_2  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_2  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_2 = postStepPoint->GetMomentumDirection();
            G4double angle_2 = std::acos(p0_2.z());
 
@@ -104,6 +108,8 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(11, angle_2/deg, ekin_2);
 
            man->FillH1(1, posPhoton2[2]);
+           man->FillNtupleDColumn(2, 1, ekin_2);
+           man->AddNtupleRow(2);
 
 
         }
@@ -116,7 +122,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_3  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_3  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_3 = postStepPoint->GetMomentumDirection();
            G4double angle_3 = std::acos(p0_3.z());
 
@@ -126,8 +132,8 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(12, angle_3/deg, ekin_3);
 
            man->FillH1(2, posPhoton3[2]);
-         //  man->FillNtupleDColumn(12, 0, angle_3/deg);
-          // man->AddNtupleRow(12);
+           man->FillNtupleDColumn(3, 1, ekin_3);
+           man->AddNtupleRow(3);
 
 
         }
@@ -138,7 +144,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_4  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_4  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_4 = postStepPoint->GetMomentumDirection();
            G4double angle_4 = std::acos(p0_4.z());
 
@@ -149,6 +155,8 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(13, angle_4/deg, ekin_4);
 
            man->FillH1(3, posPhoton4[2]);
+           man->FillNtupleDColumn(4, 1, ekin_4);
+           man->AddNtupleRow(4);
 
 
         }
@@ -159,7 +167,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_5  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_5  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_5 = postStepPoint->GetMomentumDirection();
            G4double angle_5 = std::acos(p0_5.z());
 
@@ -169,6 +177,10 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(14, angle_5/deg, ekin_5);
 
            man->FillH1(4,  posPhoton5[2]);
+           man->FillNtupleDColumn(5, 1, ekin_5);
+           man->AddNtupleRow(5);
+
+
 
 
         }
@@ -181,7 +193,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_6  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_6  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_6 = postStepPoint->GetMomentumDirection();
            G4double angle_6 = std::acos(p0_6.z());
 
@@ -191,6 +203,10 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(15, angle_6/deg, ekin_6);
 
            man->FillH1(5, posPhoton6[2]);
+           man->FillNtupleDColumn(6, 1, ekin_6);
+           man->AddNtupleRow(6);
+
+
 
         }
      }
@@ -200,7 +216,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_7  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_7  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_7 = postStepPoint->GetMomentumDirection();
            G4double angle_7 = std::acos(p0_7.z());
 
@@ -211,6 +227,10 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(16, angle_7/deg, ekin_7);
 
            man->FillH1(6,  posPhoton7[2]);
+           man->FillNtupleDColumn(7, 1, ekin_7);
+           man->AddNtupleRow(7);
+
+
 
         }
      }
@@ -221,7 +241,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_8  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_8  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_8 = postStepPoint->GetMomentumDirection();
            G4double angle_8 = std::acos(p0_8.z());
 
@@ -231,6 +251,9 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(17, angle_8/deg, ekin_8);
 
            man->FillH1(7,  posPhoton8[2]);
+           man->FillNtupleDColumn(8, 1, ekin_8);
+           man->AddNtupleRow(8);
+
 
 
 
@@ -243,7 +266,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_9  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_9  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_9 = postStepPoint->GetMomentumDirection();
            G4double angle_9 = std::acos(p0_9.z());
 
@@ -254,6 +277,10 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(18, angle_9/deg, ekin_9);
 
            man->FillH1(8, posPhoton9[2]);
+           man->FillNtupleDColumn(9, 1, ekin_9);
+           man->AddNtupleRow(9);
+
+
 
 
         }
@@ -265,7 +292,7 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
            preStepPoint = step->GetPreStepPoint();
            postStepPoint = step->GetPostStepPoint();
-           G4double ekin_10  = postStepPoint->GetKineticEnergy()/MeV;
+           G4double ekin_10  = postStepPoint->GetKineticEnergy()/keV;
            G4ThreeVector p0_10 = postStepPoint->GetMomentumDirection();
            G4double angle_10 = std::acos(p0_10.z());
 
@@ -275,6 +302,10 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
            man->FillH2(19, angle_10/deg, ekin_10);
 
            man->FillH1(9, posPhoton10[2]);
+           man->FillNtupleDColumn(10, 1, ekin_10);
+           man->AddNtupleRow(10);
+
+
  
 
         }

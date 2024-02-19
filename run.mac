@@ -2,8 +2,8 @@
 
 
 /run/initialize
-#/gps/particle proton
-/gps/particle neutron
+/gps/particle proton
+#/gps/particle neutron
 /gps/energy 100 keV
 #/gps/position 0. 0. -19. mm
 /gps/direction 0. 0. 1. 
@@ -20,6 +20,6 @@
 #/gps/position 0. 0. -19. mm
 #/gps/direction 0. 0. 1. 
 
-#/run/beamOn  1
-/run/beamOn  99000000
+/run/beamOn  1
+#/run/beamOn  99000000
 

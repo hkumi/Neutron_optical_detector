@@ -38,7 +38,7 @@ void DetectorConstruction::DefineMaterials()
   N  = new G4Element("Nitrogen","N",7.,14.007*g/mole);
   O  = new G4Element("Oxygen","O",8.,15.999*g/mole);
   F  = new G4Element("Fluorine","F",9.,18.998*g/mole);
-
+  Al = new G4Element("Aluminium", "Al", 13., 26.982*g/mole);
    // pressurized water
   G4Element* H  = new G4Element("TS_H_of_Water" ,"H" , 1., 1.0079*g/mole);
   G4Material* H2O = 
@@ -61,6 +61,11 @@ void DetectorConstruction::DefineMaterials()
   polyethylene = new G4Material("polyethylene", 0.93*g/cm3, ncomponents=2, kStateSolid, 293*kelvin, 1*atmosphere);
   polyethylene->AddElement(Hpe, natoms=4);
   polyethylene->AddElement(Cpe, natoms=2);
+
+
+  //----------------------------------- Aluminium ------------------------------------
+  Aluminium = new G4Material("Aluminium", 2.7*g/cm3, 1, kStateSolid);
+  Aluminium->AddElement(Al, 1);
 
   //silicon_detector material
   nist->FindOrBuildMaterial("G4_Si");
@@ -217,6 +222,14 @@ void DetectorConstruction::ConstructOPPAC_1(G4double Pos_PPAC_1)
                                     fLBox,
                                     false,
                                     0,true);
+
+  //surfaces
+  //Optical Properties
+  G4OpticalSurface* surfaceOppac_1 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_1->SetModel(unified);
+  surfaceOppac_1->SetType(dielectric_metal);
+  surfaceOppac_1->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_1 = new G4LogicalBorderSurface("oppac_1",fPScore_r_1,fPBox,surfaceOppac_1); 
   fScoringVolume_1 = fLScore_1;
 }
 
@@ -240,6 +253,12 @@ void DetectorConstruction::ConstructOPPAC_2(G4double Pos_PPAC_2)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_2 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_2->SetModel(unified);
+  surfaceOppac_2->SetType(dielectric_metal);
+  surfaceOppac_2->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_2 = new G4LogicalBorderSurface("oppac_2",fPScore_r_2,fPBox,surfaceOppac_2); 
+
   fScoringVolume_2 = fLScore_2;
 }
 
@@ -263,6 +282,12 @@ void DetectorConstruction::ConstructOPPAC_3(G4double Pos_PPAC_3)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_3 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_3->SetModel(unified);
+  surfaceOppac_3->SetType(dielectric_metal);
+  surfaceOppac_3->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_3 = new G4LogicalBorderSurface("oppac_3",fPScore_r_3,fPBox,surfaceOppac_3); 
+
   fScoringVolume_3 = fLScore_3;
 }
 
@@ -286,6 +311,12 @@ void DetectorConstruction::ConstructOPPAC_4(G4double Pos_PPAC_4)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_4 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_4->SetModel(unified);
+  surfaceOppac_4->SetType(dielectric_metal);
+  surfaceOppac_4->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_4 = new G4LogicalBorderSurface("oppac_4",fPScore_r_4,fPBox,surfaceOppac_4); 
+
   fScoringVolume_4 = fLScore_4;
 }
 
@@ -310,6 +341,12 @@ void DetectorConstruction::ConstructOPPAC_5(G4double Pos_PPAC_5)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_5 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_5->SetModel(unified);
+  surfaceOppac_5->SetType(dielectric_metal);
+  surfaceOppac_5->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_5 = new G4LogicalBorderSurface("oppac_5",fPScore_r_5,fPBox,surfaceOppac_5); 
+
   fScoringVolume_5 = fLScore_5;
 }
 
@@ -333,6 +370,12 @@ void DetectorConstruction::ConstructOPPAC_6(G4double Pos_PPAC_6)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_6 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_6->SetModel(unified);
+  surfaceOppac_6->SetType(dielectric_metal);
+  surfaceOppac_6->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_6 = new G4LogicalBorderSurface("oppac_6",fPScore_r_6,fPBox,surfaceOppac_6); 
+
   fScoringVolume_6 = fLScore_6;
 }
 
@@ -356,6 +399,12 @@ void DetectorConstruction::ConstructOPPAC_7(G4double Pos_PPAC_7)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_7 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_7->SetModel(unified);
+  surfaceOppac_7->SetType(dielectric_metal);
+  surfaceOppac_7->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_7 = new G4LogicalBorderSurface("oppac_7",fPScore_r_7,fPBox,surfaceOppac_7); 
+
   fScoringVolume_7 = fLScore_7;
 }
 
@@ -379,6 +428,12 @@ void DetectorConstruction::ConstructOPPAC_8(G4double Pos_PPAC_8)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_8 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_8->SetModel(unified);
+  surfaceOppac_8->SetType(dielectric_metal);
+  surfaceOppac_8->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_8 = new G4LogicalBorderSurface("oppac_8",fPScore_r_8,fPBox,surfaceOppac_8); 
+
   fScoringVolume_8 = fLScore_8;
 }
 
@@ -402,6 +457,12 @@ void DetectorConstruction::ConstructOPPAC_9(G4double Pos_PPAC_9)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_9 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_9->SetModel(unified);
+  surfaceOppac_9->SetType(dielectric_metal);
+  surfaceOppac_9->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_9 = new G4LogicalBorderSurface("oppac_9",fPScore_r_9,fPBox,surfaceOppac_9); 
+
   fScoringVolume_9 = fLScore_9;
 
 }
@@ -426,6 +487,12 @@ void DetectorConstruction::ConstructOPPAC_10(G4double Pos_PPAC_10)
                                     fLBox,
                                     false,
                                     0,true);
+  G4OpticalSurface* surfaceOppac_10 = new G4OpticalSurface("Reflecting");
+  surfaceOppac_10->SetModel(unified);
+  surfaceOppac_10->SetType(dielectric_metal);
+  surfaceOppac_10->SetFinish(polished);
+  G4LogicalBorderSurface* oppac_10 = new G4LogicalBorderSurface("oppac_10",fPScore_r_10,fPBox,surfaceOppac_10); 
+
   fScoringVolume_10 = fLScore_10;
 }
 
@@ -456,14 +523,28 @@ void DetectorConstruction::ConstructSilicon_detector(G4double Pos_Silicon)
 
 
 void DetectorConstruction::CreateAndPlaceShield(G4double thickness, G4double size, G4double position, G4LogicalVolume* motherVolume) {
-    G4Box* shield = new G4Box("shield", size, size, thickness);
-    G4LogicalVolume* lShield = new G4LogicalVolume(shield, polyethylene, "Shield");
-    
-    G4PVPlacement* pShield = new G4PVPlacement(0,
+     shield = new G4Box("shield", size, size, thickness);
+     lShield = new G4LogicalVolume(shield, polyethylene, "Shield");    
+     pShield = new G4PVPlacement(0,
                                                G4ThreeVector(0.*mm, 0.*mm, position),
                                                lShield,
                                                "Shield",
                                                motherVolume,
+                                               false,
+                                               0,true);
+}
+
+void DetectorConstruction::PlaceCoating(G4double thickness, G4double size, G4double Cposition) {
+    G4double coatingThickness = 0.01*mm;
+    G4Box* coatingSolid = new G4Box("coatingSolid", size, size, thickness + 2*coatingThickness); // Adjust the size to cover the polyethylene shield completely
+    G4LogicalVolume* lCoating = new G4LogicalVolume(coatingSolid, Aluminium, "AluminiumCoating");
+
+    // Place aluminum coating around the polyethylene shield
+    G4PVPlacement* pCoating = new G4PVPlacement(0,
+                                               G4ThreeVector(0.*mm, 0.*mm, Cposition),
+                                               lCoating,
+                                               "AluminiumCoating",
+                                               lShield,
                                                false,
                                                0,true);
 }
@@ -526,36 +607,36 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   if (fhThick == 0.06 * mm){
      G4double fhSize = 50 * mm;
 
-     CreateAndPlaceShield(fhThick, fhSize, 32.00*mm, fLBox);
+    // CreateAndPlaceShield(fhThick, fhSize, 32.00*mm, fLBox);
+    // PlaceCoating(0.01/2*mm, fhSize, 0.00*mm);
      ConstructOPPAC_1(33.56*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 35.12*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 35.12*mm, fLBox);
      ConstructOPPAC_2(36.68*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 38.24*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 38.24*mm, fLBox);
      ConstructOPPAC_3(39.8*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 41.36*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 41.36*mm, fLBox);
      ConstructOPPAC_4(42.92*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 44.48*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 44.48*mm, fLBox);
      ConstructOPPAC_5(46.04*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 47.6*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 47.6*mm, fLBox);
      ConstructOPPAC_6(49.16*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 50.72*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 50.72*mm, fLBox);
      ConstructOPPAC_7(52.28*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 53.84*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 53.84*mm, fLBox);
      ConstructOPPAC_8(55.4*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 56.96*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 56.96*mm, fLBox);
      ConstructOPPAC_9(58.52*mm);
 
-     CreateAndPlaceShield(fhThick, fhSize, 60.08*mm, fLBox);
+     //CreateAndPlaceShield(fhThick, fhSize, 60.08*mm, fLBox);
      ConstructOPPAC_10(61.64*mm);
-
   }
 
 
@@ -563,7 +644,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 //................................end of first stack..........................................
 //:::::::::::::::::::::::::::::::::::::second stack layer:::::::::::::::::::::::::::::::::::::
 // 
-   
+   //change the placement of each. 
    // this will be for a thickness of  0.10mm. halfZ
 
   else if (fhThick == 0.05 * mm){
@@ -947,8 +1028,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
   	   ConstructOPPAC_10(31.35*mm);
   }
 //:::::::::::::::::::::::::::::::::::::end of tenth stack:::::::::::::::::::::::::::::::.:
-
-
+ 
   return fPBox;
 }
 

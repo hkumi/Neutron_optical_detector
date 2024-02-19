@@ -26,7 +26,14 @@ int main(int argc, char** argv)
     G4RunManager *runManager = new G4RunManager();
     runManager->SetUserInitialization(new DetectorConstruction());
      // Physics list
-    runManager->SetUserInitialization(new PhysicsList());   
+
+    G4VModularPhysicsList* physicsList = new FTFP_BERT;
+    physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+    auto opticalPhysics = new G4OpticalPhysics();
+
+    physicsList->RegisterPhysics(opticalPhysics);
+    runManager->SetUserInitialization(physicsList);
+    //runManager->SetUserInitialization(new PhysicsList());   
 //      runManager->SetUserInitialization(new QGSP_BERT_HP());
 
     runManager->SetUserInitialization(new MyActionInitialization());
@@ -42,7 +49,7 @@ int main(int argc, char** argv)
     visManager->Initialize();
     if (ui)
     {
-       //UImanager->ApplyCommand("/control/execute vis.mac");
+       UImanager->ApplyCommand("/control/execute vis.mac");
        UImanager->ApplyCommand("/control/execute run.mac");
      
       

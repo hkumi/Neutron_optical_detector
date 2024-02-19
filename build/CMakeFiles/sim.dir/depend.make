@@ -3361,7 +3361,7 @@ CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_
 CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4Element.hh
 CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4ElementTable.hh
 CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4ElementVector.hh
-CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EmStandardPhysics.hh
+CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EmStandardPhysics_option4.hh
 CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EnergyRangeManager.hh
 CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EnvironmentUtils.hh
 CMakeFiles/sim.dir/src/physics.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4Eta.hh
@@ -3832,6 +3832,7 @@ CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4
 CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4NormalNavigation.icc
 CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4NtupleBookingManager.hh
 CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4NtupleBookingManager.icc
+CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4OpticalPhoton.hh
 CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4OpticalSurface.hh
 CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4OrderedTable.hh
 CMakeFiles/sim.dir/src/stepping.cc.o: /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4PDefManager.hh

@@ -7,7 +7,6 @@ MyRunAction::MyRunAction()
     man->SetNtupleMerging(true);
     man->SetVerboseLevel( 1 );
     man->CreateNtuple("Photons", "Photons");
-    man->CreateNtupleDColumn("Energy");
     man->CreateNtupleDColumn("fX1");
     man->CreateNtupleDColumn("fY1");
     man->CreateNtupleDColumn("fZ1");
@@ -20,67 +19,68 @@ MyRunAction::MyRunAction()
 
     man->CreateNtuple("Scoring", "Scoring");
     man->CreateNtupleDColumn("Edep");
+    man->CreateNtupleDColumn("Energy_1");
     man->FinishNtuple(1);
 
     man->CreateNtuple("Scoring_2", "Scoring_2");   
     man->CreateNtupleDColumn("Edep_2");
-    man->CreateNtupleDColumn("fX2");
+    man->CreateNtupleDColumn("Energy_2");
     man->CreateNtupleDColumn("fY2");
     man->CreateNtupleDColumn("fZ2");
     man->FinishNtuple(2);
 
     man->CreateNtuple("Scoring_3", "Scoring_3");
     man->CreateNtupleDColumn("Edep_3");
-    man->CreateNtupleDColumn("fX3");
+    man->CreateNtupleDColumn("Energy_3");
     man->CreateNtupleDColumn("fY3");
     man->CreateNtupleDColumn("fZ3");
     man->FinishNtuple(3);
 
     man->CreateNtuple("Scoring_4", "Scoring_4");
     man->CreateNtupleDColumn("Edep_4");
-    man->CreateNtupleDColumn("fX4");
+    man->CreateNtupleDColumn("Energy_4");
     man->CreateNtupleDColumn("fY4");
     man->CreateNtupleDColumn("fZ4");
     man->FinishNtuple(4);
 
     man->CreateNtuple("Scoring_5", "Scoring_5");
     man->CreateNtupleDColumn("Edep_5");
-    man->CreateNtupleDColumn("fX5");
+    man->CreateNtupleDColumn("Energy_5");
     man->CreateNtupleDColumn("fY5");
     man->CreateNtupleDColumn("fZ5");
     man->FinishNtuple(5);
 
     man->CreateNtuple("Scoring_6", "Scoring_6");
     man->CreateNtupleDColumn("Edep_6");
-    man->CreateNtupleDColumn("fX6");
+    man->CreateNtupleDColumn("Energy_6");
     man->CreateNtupleDColumn("fY6");
     man->CreateNtupleDColumn("fZ6");
     man->FinishNtuple(6);
 
     man->CreateNtuple("Scoring_7", "Scoring_7");
     man->CreateNtupleDColumn("Edep_7");
-    man->CreateNtupleDColumn("fX7");
+    man->CreateNtupleDColumn("Energy_7");
     man->CreateNtupleDColumn("fY7");
     man->CreateNtupleDColumn("fZ7");
     man->FinishNtuple(7);
 
     man->CreateNtuple("Scoring_8", "Scoring_8");
     man->CreateNtupleDColumn("Edep_8");
-    man->CreateNtupleDColumn("fX8");
+    man->CreateNtupleDColumn("Energy_8");
     man->CreateNtupleDColumn("fY8");
     man->CreateNtupleDColumn("fZ8");
     man->FinishNtuple(8);
 
     man->CreateNtuple("Scoring_9", "Scoring_9");
     man->CreateNtupleDColumn("Edep_9");
-    man->CreateNtupleDColumn("fX9");
+    man->CreateNtupleDColumn("Energy_9");
     man->CreateNtupleDColumn("fY9");
     man->CreateNtupleDColumn("fZ9");
     man->FinishNtuple(9);
 
     man->CreateNtuple("Scoring_10", "Scoring_10");
     man->CreateNtupleDColumn("Edep_10");
-    man->CreateNtupleDColumn("fX10");
+    man->CreateNtupleDColumn("Energy_10");
     man->CreateNtupleDColumn("fY10");
     man->CreateNtupleDColumn("fZ10");
     man->FinishNtuple(10);
@@ -105,16 +105,16 @@ MyRunAction::MyRunAction()
     man->CreateH2("xy9 ","xy9", 100, -2, 2, 100, -2., 2.0);
     man->CreateH2("xy10 ","xy10", 100,-2, 2, 100, -2., 2.0);
 
-    man->CreateH2("a1 ","angle vs energy_1", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a2 ","angle vs energy_2", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a3 ","angle vs energy_3", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a4 ","angle vs energy_4", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a5 ","angle vs energy_5", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a6 ","angle vs energy_6", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a7 ","angle vs energy_7", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a8 ","angle vs energy_8", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a9 ","angle vs energy_9", 100, -2, 100, 100, -0.1, 2.0);
-    man->CreateH2("a10 ","angle vs energy_10", 100,-2,100, 100, -0.1, 2.0);
+    man->CreateH2("a1 ","angle vs energy_1", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a2 ","angle vs energy_2", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a3 ","angle vs energy_3", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a4 ","angle vs energy_4", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a5 ","angle vs energy_5", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a6 ","angle vs energy_6", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a7 ","angle vs energy_7", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a8 ","angle vs energy_8", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a9 ","angle vs energy_9", 100, 0, 100, 100, 0, 100.0);
+    man->CreateH2("a10 ","angle vs energy_10", 100,0,100, 100, 0, 100.0);
 
 
     man->CreateH1("z1 ","z1", 100, -2, 8);

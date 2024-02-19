@@ -3362,7 +3362,7 @@ CMakeFiles/sim.dir/src/physics.cc.o
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4Element.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4ElementTable.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4ElementVector.hh
- /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EmStandardPhysics.hh
+ /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EmStandardPhysics_option4.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EnergyRangeManager.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4EnvironmentUtils.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4Eta.hh
@@ -3833,6 +3833,7 @@ CMakeFiles/sim.dir/src/stepping.cc.o
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4NormalNavigation.icc
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4NtupleBookingManager.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4NtupleBookingManager.icc
+ /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4OpticalPhoton.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4OpticalSurface.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4OrderedTable.hh
  /home/harriet/Geant4/geant4-v11.1.3/geant4_install/include/Geant4/G4PDefManager.hh

@@ -58,32 +58,33 @@ public:
     void ConstructOPPAC_10(G4double Pos_PPAC_10);
     void ConstructSilicon_detector(G4double Pos_Silicon);
     void CreateAndPlaceShield(G4double thickness, G4double size, G4double position, G4LogicalVolume* motherVolume) ;
+    void PlaceCoating(G4double thickness, G4double Csize, G4double Cposition);
     void Sphereball( G4double position);
 
 private:
      G4Box  *sBox,*FoShield, *TShield,*fShield,*sShield,*sScore,*solidDetector;
-     G4Box *fShield1;
+     G4Box *fShield1, *shield;
      G4Tubs *solidScintillator;
      G4VPhysicalVolume *ffPShield, *FoPShield,*fPShield,*TPShield;
      G4VPhysicalVolume *fPShield1;
      G4LogicalVolume   *fLBox,*ffLShield, *FoLShield,*fLShield,*TLShield,*fLScore, *logicScintillator;
-     G4LogicalVolume   *fLShield1;
+     G4LogicalVolume   *fLShield1,*lShield;
      G4LogicalVolume*   logicDetector;
      G4LogicalVolume   *fScoringVolume_1,*fScoringVolume_2,*fScoringVolume_3,*fScoringVolume_4;
      G4LogicalVolume   *fScoringVolume2,*fScoringVolume_5, *fScoringVolume_6;
      G4LogicalVolume   *fScoringVolume_7,*fScoringVolume_8,*fScoringVolume_9,*fScoringVolume_10;
      G4double       mat_thickness;
 
-     G4VPhysicalVolume *fPBox, *physScintillator;
+     G4VPhysicalVolume *fPBox, *physScintillator, *pShield;
 
      G4double           ShThick,ThThick,FohThick;
      G4double            fhThick,fhThick1;
 
      G4double           fBoxSize;
      G4Material*        fMaterial;     
-     G4Material *Air, *Aerogel,  *polyethylene, *NaI, *CF4 ;
+     G4Material *Air, *Aerogel,  *polyethylene, *NaI, *CF4, *Aluminium ;
      G4Material *siliconMaterial;
-     G4Element  *Na, *I, *C,*N,*O,*F;
+     G4Element  *Na, *I, *C,*N,*O,*F,*Al;
      G4Material *Vacc;     
 
      void DefineMaterials();
