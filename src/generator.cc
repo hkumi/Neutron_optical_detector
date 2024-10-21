@@ -13,8 +13,8 @@ MyPrimaryGenerator::MyPrimaryGenerator()
     //fParticleGun = new G4ParticleGun(1);
     fParticleGun = new G4GeneralParticleSource();
 /*    G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
-    G4String particleName = "proton";
-    G4ParticleDefinition *particle = particleTable->FindParticle("proton");
+    G4String particleName = "neutron";
+    G4ParticleDefinition *particle = particleTable->FindParticle("neutron");
     fParticleGun->SetParticleDefinition(particle);
     fParticleGun->SetParticleEnergy(2.0*MeV);
     fParticleGun->SetParticlePosition(G4ThreeVector(0.*mm,0.*mm,-19.*mm));

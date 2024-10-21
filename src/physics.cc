@@ -12,8 +12,9 @@
 #include "G4IonConstructor.hh"
 #include "G4ShortLivedConstructor.hh"
 #include "G4Cerenkov.hh"
-#include "G4EmStandardPhysics_option4.hh"
+#include "G4EmStandardPhysics.hh"
 #include "G4OpticalPhysics.hh"
+#include "G4EmStandardPhysics_option4.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PhysicsList::PhysicsList()
@@ -34,9 +35,9 @@ PhysicsList::PhysicsList()
   // Neutron Physics
   RegisterPhysics( new NeutronHPphysics("neutronHP"));
   // Optical Physics
+
+  RegisterPhysics(new G4OpticalPhysics());
   RegisterPhysics(new G4EmStandardPhysics_option4());
-  G4OpticalPhysics* opticalPhysics = new G4OpticalPhysics();
-  RegisterPhysics(opticalPhysics);
 
   // Hadron Elastic scattering
   //RegisterPhysics( new HadronElasticPhysicsHP(verb) );
@@ -45,17 +46,17 @@ PhysicsList::PhysicsList()
 
   // Ion Elastic scattering
   //
- // RegisterPhysics( new G4IonElasticPhysics(verb));
+  RegisterPhysics( new G4IonElasticPhysics(verb));
   
   // Ion Inelastic physics
-  //RegisterPhysics( new G4IonPhysicsXS(verb));
+  RegisterPhysics( new G4IonPhysicsXS(verb));
 
    // EM physics
   //RegisterPhysics(new ElectromagneticPhysics());
- // RegisterPhysics(new G4EmStandardPhysics());
+  RegisterPhysics(new G4EmStandardPhysics());
   
   // Decay
-//  RegisterPhysics(new G4DecayPhysics());
+  //RegisterPhysics(new G4DecayPhysics());
 
   // Radioactive decay
   //RegisterPhysics(new RadioactiveDecayPhysics());

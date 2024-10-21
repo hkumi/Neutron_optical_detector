@@ -21,7 +21,6 @@ DetectorConstruction::~DetectorConstruction()
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void DetectorConstruction::DefineMaterials()
 {
 
@@ -32,16 +31,25 @@ void DetectorConstruction::DefineMaterials()
   G4double Vdens = 1.e-25*g/cm3;
   G4double Vpres = 1.e-19*pascal;
   G4double Vtemp = 0.1*kelvin;
-  
+
   G4double a, z;
   C = nist->FindOrBuildElement("C");
   N  = new G4Element("Nitrogen","N",7.,14.007*g/mole);
   O  = new G4Element("Oxygen","O",8.,15.999*g/mole);
   F  = new G4Element("Fluorine","F",9.,18.998*g/mole);
-  Al = new G4Element("Aluminium", "Al", 13., 26.982*g/mole);
+
+  // boron
+  G4Isotope* B10 = new G4Isotope("B10", 5, 10);
+  G4Isotope* B11 = new G4Isotope("B11", 5, 11);
+  G4Element* B = new G4Element("Boron", "B", ncomponents=2);
+  B->AddIsotope(B10, 19.9*perCent);
+  B->AddIsotope(B11, 80.1*perCent);
+  G4Material* boron = new G4Material("boron", 2.46*g/cm3, ncomponents=1, kStateSolid,293*kelvin, 1*atmosphere);
+  boron->AddElement(B, natoms=1);
+
    // pressurized water
   G4Element* H  = new G4Element("TS_H_of_Water" ,"H" , 1., 1.0079*g/mole);
-  G4Material* H2O = 
+  G4Material* H2O =
   new G4Material("Water_ts", 1.000*g/cm3, ncomponents=2,
                          kStateLiquid, 593*kelvin, 150*bar);
   H2O->AddElement(H, natoms=2);
@@ -49,6 +57,9 @@ void DetectorConstruction::DefineMaterials()
   H2O->GetIonisation()->SetMeanExcitationEnergy(78.0*eV);
   // vacuum
   Vacc = new G4Material("Galactic", z=1, a=1.01*g/mole, Vdens, kStateGas, Vtemp, Vpres);
+
+  //Graphite 
+  mat_graphite = nist->FindOrBuildMaterial("G4_GRAPHITE");
   // air
   G4Element* N = new G4Element("Nitrogen", "N", 7., 14.01*g/mole);
   Air = new G4Material("air", 1.290*mg/cm3, ncomponents=2, kStateGas, 293*kelvin, 1*atmosphere);
@@ -62,21 +73,25 @@ void DetectorConstruction::DefineMaterials()
   polyethylene->AddElement(Hpe, natoms=4);
   polyethylene->AddElement(Cpe, natoms=2);
 
+  // borated polyethilene
+  b_polyethylene = new G4Material("b_polyethylene",0.94*g/cm3,ncomponents=4,kStateSolid,293*kelvin,1*atmosphere);
+  b_polyethylene->AddElement(Hpe, 11.6*perCent);
+  b_polyethylene->AddElement(Cpe, 61.2*perCent);
+  b_polyethylene->AddElement(B, 5*perCent);
+  b_polyethylene->AddElement(O, 22.2*perCent);
+  
 
-  //----------------------------------- Aluminium ------------------------------------
-  Aluminium = new G4Material("Aluminium", 2.7*g/cm3, 1, kStateSolid);
-  Aluminium->AddElement(Al, 1);
+  // Define the lead material
+  leadMaterial = new G4Material("Lead", 82, 207.2 * g/mole, 11.35 * g/cm3);
 
-  //silicon_detector material
-  nist->FindOrBuildMaterial("G4_Si");
-  siliconMaterial = G4Material::GetMaterial("G4_Si");//G4Material::GetMaterial("G4_Si");
- //...................................creating the optical detector material ...................................
-//----------------------------------- CarbonTetrafluoride ------------------------
-  G4double pressure = 0.0328947*atmosphere; //25Torr
+  //...............creating the materials for the scintillator..............................
+  //----------------------------------- CarbonTetrafluoride ------------------------
+  G4double pressure = 0.046*atmosphere; //35Torr
   G4double temperature = 293.15*kelvin; // 
   CF4 = new G4Material("CF4", 0.1223*mg/cm3,2,kStateGas,temperature,pressure);
   CF4->AddElement(C,1);
   CF4->AddElement(F,4);
+
 
   const G4int iNbEntries = 300;
 
@@ -162,421 +177,36 @@ void DetectorConstruction::DefineMaterials()
   CF4PropertiesTable->AddConstProperty("SLOWTIMECONSTANT", 10.*ns,true);
   CF4PropertiesTable->AddConstProperty("YIELDRATIO", 1.0,true);
   CF4->SetMaterialPropertiesTable(CF4PropertiesTable);
-  siliconMaterial->SetMaterialPropertiesTable(CF4PropertiesTable);
-//:....................................................................................
-  G4Material *SiO2 = new G4Material("SiO2", 2.201*g/cm3, 2);
-   Aerogel = new G4Material("Aerogel", 0.200*g/cm3, 3);
-  SiO2->AddElement(nist->FindOrBuildElement("Si"), 1);
-  SiO2->AddElement(nist->FindOrBuildElement("O"), 2);
-  Aerogel->AddMaterial(SiO2, 62.5*perCent);
-  Aerogel->AddMaterial(H2O, 37.4*perCent);
-  Aerogel->AddElement(C, 0.1*perCent);
 
-  G4double energy[2] = {1.239841939*eV/0.9, 1.239841939*eV/0.2};
-  G4double rindexAerogel[2] = {1.1, 1.1};
-  G4double rindexWorld[2] = {1.0, 1.0};
-  G4MaterialPropertiesTable *mptAerogel = new G4MaterialPropertiesTable();
-  mptAerogel->AddProperty("RINDEX", energy, rindexAerogel, 2);
-  Aerogel->SetMaterialPropertiesTable(mptAerogel);
-  G4MaterialPropertiesTable *mptWorld = new G4MaterialPropertiesTable();
-  mptWorld->AddProperty("RINDEX", energy, rindexWorld, 2);
-  Air->SetMaterialPropertiesTable(mptWorld);
 
- //.....................teflon............................
+   // ------------------------------------ Polypropilene ------------------------------------
 
-//......................end of teflon.....................
+  nist->FindOrBuildMaterial("G4_POLYPROPYLENE");
+  PP = G4Material::GetMaterial("G4_POLYPROPYLENE");
 
-  //............................End of optical detector material........................
-
-//...............creating the materials for the scintillator..............................
-  Na = nist->FindOrBuildElement("Na");
-  I = nist->FindOrBuildElement("I");
-  NaI = new G4Material("NaI", 3.67*g/cm3, 2);
-  NaI->AddElement(Na, 1);
-  NaI->AddElement(I, 1);
-
+  
+//----------------------------------- Aluminium ------------------------------------
+ 
+   G4double density;
+   Aluminium = new G4Material("Al", z = 13., a = 26.98 * g / mole,
+                        density = 2.7 * g / cm3);
+ 
 
 
 //....................End of scintillator material........................................
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void DetectorConstruction::ConstructOPPAC_1(G4double Pos_PPAC_1)
-{
-
-// scores
-  G4double ScThick_1 =  3.0*mm;
-
-  auto sScore_1 = new G4Box("sScore_1",
-                            50/2*mm,50/2*mm,ScThick_1/2);
-
-  auto fLScore_1 = new G4LogicalVolume(sScore_1,
-                                       CF4,
-                                      "fLScore_1");
-
-  auto fPScore_r_1 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_1),
-                                    fLScore_1,
-                                    "fPScore_r_1",
-                                    fLBox,
-                                    false,
-                                    0,true);
-
-  //surfaces
-  //Optical Properties
-  G4OpticalSurface* surfaceOppac_1 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_1->SetModel(unified);
-  surfaceOppac_1->SetType(dielectric_metal);
-  surfaceOppac_1->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_1 = new G4LogicalBorderSurface("oppac_1",fPScore_r_1,fPBox,surfaceOppac_1); 
-  fScoringVolume_1 = fLScore_1;
-}
-
-void DetectorConstruction::ConstructOPPAC_2(G4double Pos_PPAC_2)
-{
-
-// scores
-  G4double ScThick_2 =  3.0*mm;
-
-  auto sScore_2 = new G4Box("sScore_2",
-                            50/2*mm,50/2*mm,ScThick_2/2);
-
-  auto fLScore_2 = new G4LogicalVolume(sScore_2,
-                                       CF4,
-                                      "fLScore_2");
-
-  auto fPScore_r_2 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_2),
-                                    fLScore_2,
-                                    "fPScore_r_2",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_2 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_2->SetModel(unified);
-  surfaceOppac_2->SetType(dielectric_metal);
-  surfaceOppac_2->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_2 = new G4LogicalBorderSurface("oppac_2",fPScore_r_2,fPBox,surfaceOppac_2); 
-
-  fScoringVolume_2 = fLScore_2;
-}
-
-void DetectorConstruction::ConstructOPPAC_3(G4double Pos_PPAC_3)
-{
-
-// scores
-  G4double ScThick_3 =  3.0*mm;
-
-  auto sScore_3 = new G4Box("sScore_3",
-                            50/2*mm,50/2*mm,ScThick_3/2);
-
-  auto fLScore_3 = new G4LogicalVolume(sScore_3,
-                                       CF4,
-                                      "fLScore_3");
-
-  auto fPScore_r_3 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_3),
-                                    fLScore_3,
-                                    "fPScore_r_3",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_3 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_3->SetModel(unified);
-  surfaceOppac_3->SetType(dielectric_metal);
-  surfaceOppac_3->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_3 = new G4LogicalBorderSurface("oppac_3",fPScore_r_3,fPBox,surfaceOppac_3); 
-
-  fScoringVolume_3 = fLScore_3;
-}
-
-void DetectorConstruction::ConstructOPPAC_4(G4double Pos_PPAC_4)
-{
-
-// scores
-  G4double ScThick_4 =  3.0*mm;
-
-  auto sScore_4 = new G4Box("sScore_4",
-                            50/2*mm,50/2*mm,ScThick_4/2);
-
-  auto fLScore_4 = new G4LogicalVolume(sScore_4,
-                                       CF4,
-                                      "fLScore_4");
-
-  auto fPScore_r_4 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_4),
-                                    fLScore_4,
-                                    "fPScore_r_4",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_4 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_4->SetModel(unified);
-  surfaceOppac_4->SetType(dielectric_metal);
-  surfaceOppac_4->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_4 = new G4LogicalBorderSurface("oppac_4",fPScore_r_4,fPBox,surfaceOppac_4); 
-
-  fScoringVolume_4 = fLScore_4;
-}
 
 
-void DetectorConstruction::ConstructOPPAC_5(G4double Pos_PPAC_5)
-{
 
-// scores
-  G4double ScThick_5 =  3.0*mm;
-
-  auto sScore_5 = new G4Box("sScore_5",
-                            50/2*mm,50/2*mm,ScThick_5/2);
-
-  auto fLScore_5 = new G4LogicalVolume(sScore_5,
-                                       CF4,
-                                      "fLScore_5");
-
-  auto fPScore_r_5 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_5),
-                                    fLScore_5,
-                                    "fPScore_r_5",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_5 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_5->SetModel(unified);
-  surfaceOppac_5->SetType(dielectric_metal);
-  surfaceOppac_5->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_5 = new G4LogicalBorderSurface("oppac_5",fPScore_r_5,fPBox,surfaceOppac_5); 
-
-  fScoringVolume_5 = fLScore_5;
-}
-
-void DetectorConstruction::ConstructOPPAC_6(G4double Pos_PPAC_6)
-{
-
-// scores
-  G4double ScThick_6 =  3.0*mm;
-
-  auto sScore_6 = new G4Box("sScore_6",
-                            50/2*mm,50/2*mm,ScThick_6/2);
-
-  auto fLScore_6 = new G4LogicalVolume(sScore_6,
-                                       CF4,
-                                      "fLScore_6");
-
-  auto fPScore_r_6 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_6),
-                                    fLScore_6,
-                                    "fPScore_r_6",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_6 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_6->SetModel(unified);
-  surfaceOppac_6->SetType(dielectric_metal);
-  surfaceOppac_6->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_6 = new G4LogicalBorderSurface("oppac_6",fPScore_r_6,fPBox,surfaceOppac_6); 
-
-  fScoringVolume_6 = fLScore_6;
-}
-
-void DetectorConstruction::ConstructOPPAC_7(G4double Pos_PPAC_7)
-{
-
-// scores
-  G4double ScThick_7 =  3.0*mm;
-
-  auto sScore_7 = new G4Box("sScore_7",
-                            50/2*mm,50/2*mm,ScThick_7/2);
-
-  auto fLScore_7 = new G4LogicalVolume(sScore_7,
-                                       CF4,
-                                      "fLScore_7");
-
-  auto fPScore_r_7 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_7),
-                                    fLScore_7,
-                                    "fPScore_r_7",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_7 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_7->SetModel(unified);
-  surfaceOppac_7->SetType(dielectric_metal);
-  surfaceOppac_7->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_7 = new G4LogicalBorderSurface("oppac_7",fPScore_r_7,fPBox,surfaceOppac_7); 
-
-  fScoringVolume_7 = fLScore_7;
-}
-
-void DetectorConstruction::ConstructOPPAC_8(G4double Pos_PPAC_8)
-{
-
-// scores
-  G4double ScThick_8 =  3.0*mm;
-
-  auto sScore_8 = new G4Box("sScore_8",
-                            50/2*mm,50/2*mm,ScThick_8/2);
-
-  auto fLScore_8 = new G4LogicalVolume(sScore_8,
-                                       CF4,
-                                      "fLScore_8");
-
-  auto fPScore_r_8 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_8),
-                                    fLScore_8,
-                                    "fPScore_r_8",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_8 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_8->SetModel(unified);
-  surfaceOppac_8->SetType(dielectric_metal);
-  surfaceOppac_8->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_8 = new G4LogicalBorderSurface("oppac_8",fPScore_r_8,fPBox,surfaceOppac_8); 
-
-  fScoringVolume_8 = fLScore_8;
-}
-
-void DetectorConstruction::ConstructOPPAC_9(G4double Pos_PPAC_9)
-{
-
-// scores
-  G4double ScThick_9 =  3.0*mm;
-
-  auto sScore_9 = new G4Box("sScore_9",
-                            50/2*mm,50/2*mm,ScThick_9/2);
-
-  auto fLScore_9 = new G4LogicalVolume(sScore_9,
-                                       CF4,
-                                      "fLScore_9");
-
-  auto fPScore_r_9 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_9),
-                                    fLScore_9,
-                                    "fPScore_r_9",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_9 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_9->SetModel(unified);
-  surfaceOppac_9->SetType(dielectric_metal);
-  surfaceOppac_9->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_9 = new G4LogicalBorderSurface("oppac_9",fPScore_r_9,fPBox,surfaceOppac_9); 
-
-  fScoringVolume_9 = fLScore_9;
 
 }
-
-void DetectorConstruction::ConstructOPPAC_10(G4double Pos_PPAC_10)
-{
-
-// scores
-  G4double ScThick_10 =  3.0*mm;
-
-  auto sScore_10 = new G4Box("sScore_10",
-                            50/2*mm,50/2*mm,ScThick_10/2);
-
-  auto fLScore_10 = new G4LogicalVolume(sScore_10,
-                                       CF4,
-                                      "fLScore_10");
-
-  auto fPScore_r_10 = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_PPAC_10),
-                                    fLScore_10,
-                                    "fPScore_r_10",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  G4OpticalSurface* surfaceOppac_10 = new G4OpticalSurface("Reflecting");
-  surfaceOppac_10->SetModel(unified);
-  surfaceOppac_10->SetType(dielectric_metal);
-  surfaceOppac_10->SetFinish(polished);
-  G4LogicalBorderSurface* oppac_10 = new G4LogicalBorderSurface("oppac_10",fPScore_r_10,fPBox,surfaceOppac_10); 
-
-  fScoringVolume_10 = fLScore_10;
-}
-
-
-
-void DetectorConstruction::ConstructSilicon_detector(G4double Pos_Silicon)
-{
-
-// scores
-  G4double SiliconThick =  3.0*mm;
-
-  auto siliconbox = new G4Box("siliconbox",
-                            25/2*mm,25/2*mm,SiliconThick);
-
-  auto siliconLV = new G4LogicalVolume(siliconbox,
-                                       siliconMaterial,
-                                      "siliconLV");
-
-  auto siliconPV = new G4PVPlacement(0,
-                                    G4ThreeVector(0.*mm,0.*mm,Pos_Silicon),
-                                    siliconLV,
-                                    "siliconPV",
-                                    fLBox,
-                                    false,
-                                    0,true);
-  fScoringVolume2 = siliconLV;
-}
-
-
-void DetectorConstruction::CreateAndPlaceShield(G4double thickness, G4double size, G4double position, G4LogicalVolume* motherVolume) {
-     shield = new G4Box("shield", size, size, thickness);
-     lShield = new G4LogicalVolume(shield, polyethylene, "Shield");    
-     pShield = new G4PVPlacement(0,
-                                               G4ThreeVector(0.*mm, 0.*mm, position),
-                                               lShield,
-                                               "Shield",
-                                               motherVolume,
-                                               false,
-                                               0,true);
-}
-
-void DetectorConstruction::PlaceCoating(G4double thickness, G4double size, G4double Cposition) {
-    G4double coatingThickness = 0.01*mm;
-    G4Box* coatingSolid = new G4Box("coatingSolid", size, size, thickness + 2*coatingThickness); // Adjust the size to cover the polyethylene shield completely
-    G4LogicalVolume* lCoating = new G4LogicalVolume(coatingSolid, Aluminium, "AluminiumCoating");
-
-    // Place aluminum coating around the polyethylene shield
-    G4PVPlacement* pCoating = new G4PVPlacement(0,
-                                               G4ThreeVector(0.*mm, 0.*mm, Cposition),
-                                               lCoating,
-                                               "AluminiumCoating",
-                                               lShield,
-                                               false,
-                                               0,true);
-}
-
-void DetectorConstruction::Sphereball( G4double position) {
-     G4double minSphereradius =  0*mm; 
-     G4double maxSphereradius = 30*mm; 
-     G4Sphere* sphereball = new G4Sphere("sphereball", minSphereradius/2, maxSphereradius/2 , 0*deg,360*deg,0*deg,180*deg);
-     G4LogicalVolume* sphereVolume = new G4LogicalVolume(sphereball, polyethylene, "Sphere");
-     G4PVPlacement* spherePlacement  = new G4PVPlacement(0,
-                                               G4ThreeVector(0.*mm, 0.*mm, position),
-                                               sphereVolume,
-                                               "Sphere",
-                                               fLBox,
-                                               false,
-                                               0,true);
-     G4VisAttributes* blue = new G4VisAttributes(G4Colour::Blue());
-  
-     blue->SetVisibility(true);
-     blue->SetForceAuxEdgeVisible(true);
-
-
-     sphereVolume->SetVisAttributes(blue);
-
-
-}  
-
 
 G4VPhysicalVolume *DetectorConstruction::Construct()
 {
 
-  fBoxSize = 30*cm;
+   
+
+  // The world
+  fBoxSize = 5*m;
 
 
   sBox = new G4Box("world",                             //its name
@@ -594,441 +224,835 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
                             false,                      //no boolean operation
                             0);                         //copy number
 
-  Sphereball(2.00*mm); 
+//The HDPE_block1
+
+  fblockSize = 10*cm;
+
+
+  HDPE_Box1 = new G4Box("HDPE1",                             //its name
+                   10*cm/2,10*cm/2,5*cm/2);   //its dimensions
+
+  HDPE_LV1 = new G4LogicalVolume(HDPE_Box1,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE1");                  //its name
+
+  HDPE_PV1 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,0,2.5*cm),            //at (0,0,0)
+                             HDPE_LV1,                      //its logical volume
+                            "HDPE1",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block2
+
+
+  HDPE_Box2 = new G4Box("HDPE2",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV2 = new G4LogicalVolume(HDPE_Box2,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE2");                  //its name
+
+  HDPE_PV2 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,10*cm,5*cm),            //at (0,0,0)
+                             HDPE_LV2,                      //its logical volume
+                            "HDPE2",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+ //The HDPE_block3
+
+
+  HDPE_Box3 = new G4Box("HDPE3",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV3 = new G4LogicalVolume(HDPE_Box3,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE3");                  //its name
+
+  HDPE_PV3 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,-10*cm,5*cm),            //at (0,0,0)
+                             HDPE_LV3,                      //its logical volume
+                            "HDPE3",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+  //The HDPE_block4
+
+
+  HDPE_Box4 = new G4Box("HDPE4",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV4 = new G4LogicalVolume(HDPE_Box4,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE4");                  //its name
+
+  HDPE_PV4 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,10*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV4,                      //its logical volume
+                            "HDPE4",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block5
+
+
+  HDPE_Box5 = new G4Box("HDPE5",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV5 = new G4LogicalVolume(HDPE_Box5,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE5");                  //its name
+
+  HDPE_PV5 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,-10*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV5,                      //its logical volume
+                            "HDPE5",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+ //The HDPE_block6
+
+
+  HDPE_Box6 = new G4Box("HDPE6",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV6 = new G4LogicalVolume(HDPE_Box6,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE6");                  //its name
+
+  HDPE_PV6 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,0,5*cm),            //at (0,0,0)
+                             HDPE_LV6,                      //its logical volume
+                            "HDPE6",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+  //The HDPE_block7
+
+
+  HDPE_Box7 = new G4Box("HDPE7",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV7 = new G4LogicalVolume(HDPE_Box7,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE7");                  //its name
+
+
+  HDPE_PV7 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,0,5*cm),            //at (0,0,0)
+                             HDPE_LV7,                      //its logical volume
+                            "HDPE7",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+//The HDPE_block8
+
+
+  HDPE_Box8 = new G4Box("HDPE8",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV8 = new G4LogicalVolume(HDPE_Box8,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE8");                  //its name
+
+  HDPE_PV8 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,10*cm,5*cm),            //at (0,0,0)
+                             HDPE_LV8,                      //its logical volume
+                            "HDPE8",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+     //The HDPE_block9
+
+
+  HDPE_Box9 = new G4Box("HDPE9",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV9 = new G4LogicalVolume(HDPE_Box9,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE9");                  //its name
+
+  HDPE_PV9 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,-10*cm,5*cm),            //at (0,0,0)
+                             HDPE_LV9,                      //its logical volume
+                            "HDPE9",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block10
+
+  HDPE_Box10 = new G4Box("HDPE10",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV10 = new G4LogicalVolume(HDPE_Box10,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE10");                  //its name
+
+  HDPE_PV10 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,10*cm,5*cm),            //at (0,0,0)
+                             HDPE_LV10,                      //its logical volume
+                            "HDPE10",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+   //The HDPE_block11
+
+  HDPE_Box11 = new G4Box("HDPE11",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV11 = new G4LogicalVolume(HDPE_Box11,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE11");                  //its name
+
+  HDPE_PV11 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,-10*cm,5*cm),            //at (0,0,0)
+                             HDPE_LV11,                      //its logical volume
+                            "HDPE11",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+//The HDPE_block12
+
+
+  HDPE_Box12 = new G4Box("HDPE12",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV12 = new G4LogicalVolume(HDPE_Box12,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE12");                  //its name
+
+  HDPE_PV12 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,-10*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV12,                      //its logical volume
+                            "HDPE12",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+ //The HDPE_block13
+
+
+  HDPE_Box13 = new G4Box("HDPE13",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV13 = new G4LogicalVolume(HDPE_Box13,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE13");                  //its name
+
+  HDPE_PV13 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,10*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV13,                      //its logical volume
+                            "HDPE13",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block14
+
+
+  HDPE_Box14 = new G4Box("HDPE14",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV14 = new G4LogicalVolume(HDPE_Box14,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE14");                  //its name
+
+  HDPE_PV14 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,-10*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV14,                      //its logical volume
+                            "HDPE14",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+
+  //The HDPE_block15
+
+  HDPE_Box15 = new G4Box("HDPE15",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV15 = new G4LogicalVolume(HDPE_Box15,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE15");                  //its name
+
+  HDPE_PV15 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,10*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV15,                      //its logical volume
+                            "HDPE15",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block16
+
+
+  HDPE_Box16 = new G4Box("HDPE16",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV16 = new G4LogicalVolume(HDPE_Box16,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE16");                  //its name
+
+  HDPE_PV16 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,0*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV16,                      //its logical volume
+                            "HDPE16",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+   
+
+//The HDPE_block17
+
+  HDPE_Box17 = new G4Box("HDPE17",                             //its name
+                   fblockSize/2,fblockSize/2,fblockSize/2);   //its dimensions
+
+  HDPE_LV17 = new G4LogicalVolume(HDPE_Box17,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE17");                  //its name
+
+  HDPE_PV17 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,0*cm,15*cm),            //at (0,0,0)
+                             HDPE_LV17,                      //its logical volume
+                            "HDPE17",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+    //The HDPE_block18
+
+
+  HDPE_Box18 = new G4Box("HDPE18",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV18 = new G4LogicalVolume(HDPE_Box18,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE18");                  //its name
+
+  HDPE_PV18 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,-10*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV18,                      //its logical volume
+                            "HDPE18",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+    //The HDPE_block19
+
+
+  HDPE_Box19 = new G4Box("HDPE19",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV19 = new G4LogicalVolume(HDPE_Box19,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE19");                  //its name
+
+  HDPE_PV19 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,-10*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV19,                      //its logical volume
+                            "HDPE19",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);
+
+     //The HDPE_block20
+
+
+  HDPE_Box20 = new G4Box("HDPE20",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV20 = new G4LogicalVolume(HDPE_Box20,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE20");                  //its name
+
+  HDPE_PV20 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,10*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV20,                      //its logical volume
+                            "HDPE20",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+ //The HDPE_block21
+
+  HDPE_Box21 = new G4Box("HDPE21",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV21 = new G4LogicalVolume(HDPE_Box21,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE21");                  //its name
+
+  HDPE_PV21 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,10*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV21,                      //its logical volume
+                            "HDPE21",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block22
+
+
+  HDPE_Box22 = new G4Box("HDPE22",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV22 = new G4LogicalVolume(HDPE_Box22,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE22");                  //its name
+
+  HDPE_PV22 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-10*cm,0*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV22,                      //its logical volume
+                            "HDPE22",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block23
+
+  HDPE_Box23 = new G4Box("HDPE23",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV23 = new G4LogicalVolume(HDPE_Box23,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE23");                  //its name
+
+  HDPE_PV23 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(10*cm,0*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV23,                      //its logical volume
+                            "HDPE23",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+ //The HDPE_block24
+  
+
+  HDPE_Box24 = new G4Box("HDPE24",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV24 = new G4LogicalVolume(HDPE_Box24,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE24");                  //its name
+
+  HDPE_PV24 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,10*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV24,                      //its logical volume
+                            "HDPE24",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+//The HDPE_block25
+
+
+  HDPE_Box25 = new G4Box("HDPE25",                             //its name
+                   fblockSize/2,fblockSize/2,10*cm/2);   //its dimensions
+
+  HDPE_LV25 = new G4LogicalVolume(HDPE_Box25,                     //its shape
+                              polyethylene,                      //its material
+                             "HDPE25");                  //its name
+
+  HDPE_PV25 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,-10*cm,25*cm),            //at (0,0,0)
+                             HDPE_LV25,                      //its logical volume
+                            "HDPE25",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+
+//The lead1
+  fLeadSize = 10*cm;
+
+
+  Lead_Box = new G4Box("Lead",                             //its name
+                   fLeadSize/2,fLeadSize/2, 5*cm/2);   //its dimensions
+
+  Lead_LV = new G4LogicalVolume(Lead_Box,                     //its shape
+                              leadMaterial,                      //its material
+                             "Lead");                  //its name
+
+  Lead_PV = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,0,7.5*cm),            //at (0,0,0)
+                             Lead_LV,                      //its logical volume
+                            "Lead",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+   G4VisAttributes* red = new G4VisAttributes(G4Colour::Red());
+
+   red->SetVisibility(true);
+   red->SetForceAuxEdgeVisible(true);
+
+   Lead_LV->SetVisAttributes(red);
+
+//................................................................................
+   // Graphite block1 
+/*
+  fGraphiteSize = 10*cm;
+
+
+  Graphite_Box = new G4Box("Grap",                             //its name
+                   fGraphiteSize/2,fGraphiteSize/2, 5*cm/2);   //its dimensions
+
+  Graphite_LV = new G4LogicalVolume(Graphite_Box,                     //its shape
+                              mat_graphite,                      //its material
+                             "Grap");                  //its name
+
+  Graphite_PV = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,0,17.5*cm),            //at (0,0,0)
+                             Graphite_LV,                      //its logical volume
+                            "Grap",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+  Hole3 = new G4Tubs("BoxHole3", 0.0*cm, 3*cm, 2.5*cm, 0*deg, 360*deg);
+
+  Hole_LV3 = new G4LogicalVolume(Hole3,                     //its shape
+                                 Vacc,                      //its material
+                                 "H3");    
  
 
+   // Graphite block2 
 
 
-  // shielding
-/////...........first stack layer ...........................................................................
+  Graphite_Box2 = new G4Box("Grap2",                             //its name
+                   30*cm/2,3*cm/2, 20*cm/2);   //its dimensions
 
-  fhThick = 0.06 * mm;   // this will be for a thickness of  0.12mm. halfZ
+  Graphite_LV2 = new G4LogicalVolume(Graphite_Box2,                     //its shape
+                              mat_graphite,                      //its material
+                             "Grap2");                  //its name
 
-  if (fhThick == 0.06 * mm){
-     G4double fhSize = 50 * mm;
+  Graphite_PV2 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,6.5*cm,10*cm),            //at (0,0,0)
+                             Graphite_LV2,                      //its logical volume
+                            "Grap2",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+  // // Graphite block3
 
-    // CreateAndPlaceShield(fhThick, fhSize, 32.00*mm, fLBox);
-    // PlaceCoating(0.01/2*mm, fhSize, 0.00*mm);
-     ConstructOPPAC_1(33.56*mm);
 
-     //CreateAndPlaceShield(fhThick, fhSize, 35.12*mm, fLBox);
-     ConstructOPPAC_2(36.68*mm);
+  Graphite_Box3 = new G4Box("Grap3",                             //its name
+                   30*cm/2,3*cm/2, 20*cm/2);   //its dimensions
 
-     //CreateAndPlaceShield(fhThick, fhSize, 38.24*mm, fLBox);
-     ConstructOPPAC_3(39.8*mm);
+  Graphite_LV3 = new G4LogicalVolume(Graphite_Box3,                     //its shape
+                              mat_graphite,                      //its material
+                             "Grap3");                  //its name
 
-     //CreateAndPlaceShield(fhThick, fhSize, 41.36*mm, fLBox);
-     ConstructOPPAC_4(42.92*mm);
+  Graphite_PV3 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0,-6.5*cm,10*cm),            //at (0,0,0)
+                             Graphite_LV3,                      //its logical volume
+                            "Grap3",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
 
-     //CreateAndPlaceShield(fhThick, fhSize, 44.48*mm, fLBox);
-     ConstructOPPAC_5(46.04*mm);
 
-     //CreateAndPlaceShield(fhThick, fhSize, 47.6*mm, fLBox);
-     ConstructOPPAC_6(49.16*mm);
+  */
+//.........................................................................................................................................
+  //The Borated polythylene_block1 with pinhole
 
-     //CreateAndPlaceShield(fhThick, fhSize, 50.72*mm, fLBox);
-     ConstructOPPAC_7(52.28*mm);
+  BoratedSize = 30*cm;
+  Borated_thickness = 3*cm;
+  Borated_Box1 = new G4Box("Borated1",                             //its name
+                   BoratedSize/2,  BoratedSize/2,Borated_thickness/2);   //its dimensions
 
-     //CreateAndPlaceShield(fhThick, fhSize, 53.84*mm, fLBox);
-     ConstructOPPAC_8(55.4*mm);
 
-     //CreateAndPlaceShield(fhThick, fhSize, 56.96*mm, fLBox);
-     ConstructOPPAC_9(58.52*mm);
 
-     //CreateAndPlaceShield(fhThick, fhSize, 60.08*mm, fLBox);
-     ConstructOPPAC_10(61.64*mm);
-  }
+  Hole = new G4Tubs("BoxHole", 0.0*cm, 0.75*cm, 1.5*cm, 0*deg, 360*deg);  // the diameter of the exit(pinhole) is 3cm. In G4 we use halfsize of the radius. 
 
+  Hole_LV = new G4LogicalVolume(Hole,                     //its shape
+                              Vacc,                      //its material
+                             "H1");                  //its name
 
+   Borated_LV1 = new G4LogicalVolume(Borated_Box1,                     //its shape
+                              b_polyethylene,                      //its material
+                             "Borated1", 0,0,0);                  //its name
 
-//................................end of first stack..........................................
-//:::::::::::::::::::::::::::::::::::::second stack layer:::::::::::::::::::::::::::::::::::::
-// 
-   //change the placement of each. 
-   // this will be for a thickness of  0.10mm. halfZ
 
-  else if (fhThick == 0.05 * mm){
-          G4double fhSize = 50 * mm;
 
-          CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-          ConstructOPPAC_1(1.55*mm);
+  Borated_PV1 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0*cm,0*cm,31.5*cm),            //at (0,0,0)
+                             Borated_LV1,                      //its logical volume
+                            "Borated1",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
 
-          CreateAndPlaceShield(fhThick, fhSize, 3.10*mm, fLBox);
-          ConstructOPPAC_2(4.65*mm);
+  Hole_PV = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0*cm,0*cm,0*cm),            //at (0,0,0)
+                             Hole_LV,                      //its logical volume
+                            "H1",                    //its name
+                            Borated_LV1,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
 
-          CreateAndPlaceShield(fhThick, fhSize, 6.2*mm, fLBox);
-          ConstructOPPAC_3(7.75*mm);
+//..................................................
+/*
+  Hole_PV3 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0*cm,0*cm,0*cm),            //at (0,0,0)
+                            Hole_LV3,                      //its logical volume
+                            "H3",                    //its name
+                            Graphite_LV,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
 
-          CreateAndPlaceShield(fhThick, fhSize, 9.30*mm, fLBox);
-          ConstructOPPAC_4(10.85*mm);
 
-          CreateAndPlaceShield(fhThick, fhSize, 12.40*mm, fLBox);
-          ConstructOPPAC_5(13.95*mm);
 
-          CreateAndPlaceShield(fhThick, fhSize, 15.50*mm, fLBox);
-          ConstructOPPAC_6(17.05*mm);
+*/
+//.......................................................................
 
-          CreateAndPlaceShield(fhThick, fhSize, 18.60*mm, fLBox);
-          ConstructOPPAC_7(20.15*mm);
+   G4VisAttributes* green = new G4VisAttributes(G4Colour::Green());
 
-          CreateAndPlaceShield(fhThick, fhSize, 21.70*mm, fLBox);
-          ConstructOPPAC_8(23.25*mm);
+   green->SetVisibility(true);
+   green->SetForceAuxEdgeVisible(true);
 
-          CreateAndPlaceShield(fhThick, fhSize, 24.80*mm, fLBox);
-          ConstructOPPAC_9(26.35*mm);
+   Borated_LV1->SetVisAttributes(green);
 
-          CreateAndPlaceShield(fhThick, fhSize, 27.90*mm, fLBox);
-          ConstructOPPAC_10(29.45*mm);
 
-  }
-//:::::::::::::::::::::::::::::::::::::end of second stack:::::::::::::::::::::::::::::::.:
-  //:::::::::::::::::::::::::::::::::::::third stack layer:::::::::::::::::::::::::::::::::::::
+   //The lead2
+  
 
-  // this will be for a thickness of  0.14mm. halfZ
+  LeadSize = 3*cm;
+  Lead_Box2 = new G4Box("Lead2",                             //its name
+                   30*cm/2,LeadSize/2,33*cm/2);   //its dimensions
 
-  else if (fhThick == 0.07 * mm){
-          G4double fhSize = 50 * mm;
+  Lead_LV2 = new G4LogicalVolume(Lead_Box2,                     //its shape
+                              leadMaterial,                      //its material
+                             "Lead2");                  //its name
 
-          CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-          ConstructOPPAC_1(1.57*mm);
+  Lead_PV2 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0*cm,16.5*cm,16.5*cm),            //at (0,0,0)
+                             Lead_LV2,                      //its logical volume
+                            "Lead2",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
 
-          CreateAndPlaceShield(fhThick, fhSize, 3.14*mm, fLBox);
-          ConstructOPPAC_2(4.71*mm);
 
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.28*mm, fLBox);
-  	  ConstructOPPAC_3(7.85*mm);
+  G4VisAttributes* yellow= new G4VisAttributes(G4Colour::Yellow());
 
-  	  CreateAndPlaceShield(fhThick, fhSize, 9.42*mm, fLBox);
-  	  ConstructOPPAC_4(10.99*mm);
+  yellow->SetVisibility(true);
+  yellow->SetForceAuxEdgeVisible(true);
 
-  	  CreateAndPlaceShield(fhThick, fhSize, 12.56*mm, fLBox);
-  	  ConstructOPPAC_5(14.13*mm);
+  Lead_LV2->SetVisAttributes(red);
 
-  	  CreateAndPlaceShield(fhThick, fhSize, 15.70*mm, fLBox);
-  	  ConstructOPPAC_6(17.27*mm);
 
-  	  CreateAndPlaceShield(fhThick, fhSize, 18.84*mm, fLBox);
-  	  ConstructOPPAC_7(20.41*mm);
 
-  	  CreateAndPlaceShield(fhThick, fhSize, 21.98*mm, fLBox);
-  	  ConstructOPPAC_8(23.55*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 25.12*mm, fLBox);
-  	  ConstructOPPAC_9(26.69*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 28.26*mm, fLBox);
-  	  ConstructOPPAC_10(29.83*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of third stack:::::::::::::::::::::::::::::::.:
-   //:::::::::::::::::::::::::::::::::::::forth stack layer:::::::::::::::::::::::::::::::::::::
-
-  // this will be for a thickness of  0.16mm. halfZ
-
-  else if (fhThick == 0.08 * mm){
-          G4double fhSize = 50 * mm;
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-  	  ConstructOPPAC_1(1.58*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 3.16*mm, fLBox);
-  	  ConstructOPPAC_2(4.74*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.32*mm, fLBox);
-  	  ConstructOPPAC_3(7.9*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 9.48*mm, fLBox);
-  	  ConstructOPPAC_4(11.06*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 12.64*mm, fLBox);
-  	  ConstructOPPAC_5(14.22*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 15.80*mm, fLBox);
-  	  ConstructOPPAC_6(17.38*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 18.96*mm, fLBox);
-  	  ConstructOPPAC_7(20.54*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 22.12*mm, fLBox);
-  	  ConstructOPPAC_8(23.70*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 25.28*mm, fLBox);
-  	  ConstructOPPAC_9(26.86*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 28.44*mm, fLBox);
-  	  ConstructOPPAC_10(30.02*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of forth stack:::::::::::::::::::::::::::::::.:
-//:::::::::::::::::::::::::::::::::::::fifth stack layer:::::::::::::::::::::::::::::::::::::
-
-  // this will be for a thickness of  0.18mm. halfZ
-
-  else if (fhThick == 0.09 * mm){
-  	  G4double fhSize = 50 * mm;
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-  	  ConstructOPPAC_1(1.59*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 3.18*mm, fLBox);
-  	  ConstructOPPAC_2(4.77*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.36*mm, fLBox);
-  	  ConstructOPPAC_3(7.95*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 9.54*mm, fLBox);
-  	  ConstructOPPAC_4(11.13*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 12.72*mm, fLBox);
-  	  ConstructOPPAC_5(14.31*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 15.90*mm, fLBox);
-  	  ConstructOPPAC_6(17.49*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 19.08*mm, fLBox);
-  	  ConstructOPPAC_7(20.67*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 22.26*mm, fLBox);
-  	  ConstructOPPAC_8(23.85*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 25.44*mm, fLBox);
-  	  ConstructOPPAC_9(27.03*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 28.62*mm, fLBox);
-          ConstructOPPAC_10(30.21*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of fifth stack:::::::::::::::::::::::::::::::.:
-
-//:::::::::::::::::::::::::::::::::::::sixth stack layer:::::::::::::::::::::::::::::::::::::
-
-  // this will be for a thickness of  0.20mm. halfZ
-  else if (fhThick == 0.10 * mm){
-  	  G4double fhSize = 50 * mm;
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-  	  ConstructOPPAC_1(1.60*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 3.20*mm, fLBox);
-  	  ConstructOPPAC_2(4.8*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.40*mm, fLBox);
-  	  ConstructOPPAC_3(8.0*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 9.60*mm, fLBox);
-  	  ConstructOPPAC_4(11.20*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 12.80*mm, fLBox);
-  	  ConstructOPPAC_5(14.40*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 16.00*mm, fLBox);
-  	  ConstructOPPAC_6(17.60*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 19.20*mm, fLBox);
-  	  ConstructOPPAC_7(20.80*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 22.40*mm, fLBox);
-  	  ConstructOPPAC_8(24.0*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 25.60*mm, fLBox);
-          ConstructOPPAC_9(27.20*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 28.80*mm, fLBox);
-  	  ConstructOPPAC_10(30.40*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of sixth stack:::::::::::::::::::::::::::::::.:
-
- // this will be for a thickness of  0.22mm. halfZ
-
- else if (fhThick == 0.11 * mm){
-          G4double fhSize = 50 * mm;
-
-          CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-          ConstructOPPAC_1(1.61*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 3.22*mm, fLBox);
-          ConstructOPPAC_2(4.83*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 6.44*mm, fLBox);
-          ConstructOPPAC_3(8.05*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 9.66*mm, fLBox);
-          ConstructOPPAC_4(11.27*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 12.88*mm, fLBox);
-          ConstructOPPAC_5(14.49*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 16.10*mm, fLBox);
-          ConstructOPPAC_6(17.71*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 19.32*mm, fLBox);
-          ConstructOPPAC_7(20.93*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 22.54*mm, fLBox);
-          ConstructOPPAC_8(24.15*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 25.76*mm, fLBox);
-          ConstructOPPAC_9(27.37*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 28.98*mm, fLBox);
-          ConstructOPPAC_10(30.59*mm);
-  }
-
-
-//:::::::::::::::::::::::::::::::::::::seventh stack layer:::::::::::::::::::::::::::::::::::::
-
-  // this will be for a thickness of  0.24mm. halfZ
-
-  else if (fhThick == 0.12 * mm){
-  	  G4double fhSize = 50 * mm;
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-  	  ConstructOPPAC_1(1.62*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 3.24*mm, fLBox);
-  	  ConstructOPPAC_2(4.86*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.48*mm, fLBox);
-  	  ConstructOPPAC_3(8.1*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 9.72*mm, fLBox);
-  	  ConstructOPPAC_4(11.34*mm);
-
- 	  CreateAndPlaceShield(fhThick, fhSize, 12.96*mm, fLBox);
-  	  ConstructOPPAC_5(14.58*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 16.20*mm, fLBox);
-  	  ConstructOPPAC_6(17.82*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 19.44*mm, fLBox);
-  	  ConstructOPPAC_7(21.06*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 22.68*mm, fLBox);
-          ConstructOPPAC_8(24.3*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 25.92*mm, fLBox);
-          ConstructOPPAC_9(27.54*mm);
-
-          CreateAndPlaceShield(fhThick, fhSize, 29.16*mm, fLBox);
-          ConstructOPPAC_10(30.78*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of seventh stack:::::::::::::::::::::::::::::::.:
-
-//:::::::::::::::::::::::::::::::::::::Eigth stack layer:::::::::::::::::::::::::::::::::::::
-
- // this will be for a thickness of  0.26mm. halfZ
-
-  else if (fhThick == 0.13 * mm){
-          G4double fhSize = 50 * mm;
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-  	  ConstructOPPAC_1(1.63*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 3.26*mm, fLBox);
-  	  ConstructOPPAC_2(4.89*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.52*mm, fLBox);
-  	  ConstructOPPAC_3(8.15*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 9.78*mm, fLBox);
-  	  ConstructOPPAC_4(11.41*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 13.04*mm, fLBox);
-  	  ConstructOPPAC_5(14.67*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 16.30*mm, fLBox);
-          ConstructOPPAC_6(17.93*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 19.56*mm, fLBox);
-  	  ConstructOPPAC_7(21.19*mm);
-
- 	  CreateAndPlaceShield(fhThick, fhSize, 22.82*mm, fLBox);
-  	  ConstructOPPAC_8(24.45*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 26.08*mm, fLBox);
-  	  ConstructOPPAC_9(27.71*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 29.34*mm, fLBox);
-  	  ConstructOPPAC_10(30.97*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of eight stack:::::::::::::::::::::::::::::::.:
-
-
-//:::::::::::::::::::::::::::::::::::::ninth stack layer:::::::::::::::::::::::::::::::::::::
-
-  // this will be for a thickness of  0.28mm. halfZ
-
-  else if (fhThick == 0.14 * mm){
-  	  G4double fhSize = 50 * mm;
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-  	  ConstructOPPAC_1(1.64*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 3.28*mm, fLBox);
-  	  ConstructOPPAC_2(4.92*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 6.56*mm, fLBox);
-          ConstructOPPAC_3(8.2*mm);
-
- 	  CreateAndPlaceShield(fhThick, fhSize, 9.84*mm, fLBox);
-  	  ConstructOPPAC_4(11.48*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 13.12*mm, fLBox);
-  	  ConstructOPPAC_5(14.76*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 16.40*mm, fLBox);
-  	  ConstructOPPAC_6(18.04*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 19.68*mm, fLBox);
-  	  ConstructOPPAC_7(21.32*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 22.96*mm, fLBox);
-  	  ConstructOPPAC_8(24.60*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 26.24*mm, fLBox);
-  	  ConstructOPPAC_9(27.88*mm);
-
-  	  CreateAndPlaceShield(fhThick, fhSize, 29.52*mm, fLBox);
-  	  ConstructOPPAC_10(31.16*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of ninth stack:::::::::::::::::::::::::::::::.:
-
-//:::::::::::::::::::::::::::::::::::: tenth stack layer:::::::::::::::::::::::::::::::::::::
-
-  // this will be for a thickness of  0.30mm. halfZ
-
-  else if  (fhThick == 0.15 * mm){
-           G4double fhSize = 50 * mm;
-
-           CreateAndPlaceShield(fhThick, fhSize, 0.00*mm, fLBox);
-           ConstructOPPAC_1(1.65*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 3.30*mm, fLBox);
-  	   ConstructOPPAC_2(4.95*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 6.6*mm, fLBox);
-  	   ConstructOPPAC_3(8.25*mm);
-
- 	   CreateAndPlaceShield(fhThick, fhSize, 9.9*mm, fLBox);
-  	   ConstructOPPAC_4(11.55*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 13.20*mm, fLBox);
-  	   ConstructOPPAC_5(14.85*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 16.50*mm, fLBox);
-  	   ConstructOPPAC_6(18.15*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 19.80*mm, fLBox);
-  	   ConstructOPPAC_7(21.45*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 23.10*mm, fLBox);
-  	   ConstructOPPAC_8(24.75*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 26.40*mm, fLBox);
-  	   ConstructOPPAC_9(28.05*mm);
-
-  	   CreateAndPlaceShield(fhThick, fhSize, 29.70*mm, fLBox);
-  	   ConstructOPPAC_10(31.35*mm);
-  }
-//:::::::::::::::::::::::::::::::::::::end of tenth stack:::::::::::::::::::::::::::::::.:
+     //The lead3
  
+  Lead_Box3 = new G4Box("Lead3",                             //its name
+                   3*cm/2,30*cm/2, 33*cm/2);   //its dimensions
+
+  Lead_LV3 = new G4LogicalVolume(Lead_Box3,                     //its shape
+                              leadMaterial,                      //its material
+                             "Lead3");                  //its name
+
+  Lead_PV3 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(16.5*cm,0*cm,16.5*cm),            //at (0,0,0)
+                             Lead_LV3,                      //its logical volume
+                            "Lead3",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+   
+  Lead_LV3->SetVisAttributes(red);
+
+  //The lead4
+
+  Lead_Box4 = new G4Box("Lead4",                             //its name
+                   3*cm/2,30*cm/2, 33*cm/2);   //its dimensions
+
+  Lead_LV4 = new G4LogicalVolume(Lead_Box4,                     //its shape
+                              leadMaterial,                      //its material
+                             "Lead4");                  //its name
+
+  Lead_PV4 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(-16.5*cm,0*cm,16.5*cm),            //at (0,0,0)
+                             Lead_LV4,                      //its logical volume
+                            "Lead4",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+   
+  Lead_LV4->SetVisAttributes(red);
+
+  //The lead5
+
+  Lead_Box5 = new G4Box("Lead5",                             //its name
+                   30*cm/2,30*cm/2, 3*cm/2);   //its dimensions
+
+  Lead_LV5 = new G4LogicalVolume(Lead_Box5,                     //its shape
+                              leadMaterial,                      //its material
+                             "Lead5");                  //its name
+
+  Lead_PV5 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0*cm,0*cm,34.5*cm),            //at (0,0,0)
+                             Lead_LV5,                      //its logical volume
+                            "Lead5",                    //its name
+                            fLBox,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+  Hole_PV2 = new G4PVPlacement(0,                          //no rotation
+                            G4ThreeVector(0*cm,0*cm,0*cm),            //at (0,0,0)
+                             Hole_LV,                      //its logical volume
+                            "H2",                    //its name
+                             Lead_LV5,                          //its mother  volume
+                            false,                      //no boolean operation
+                            0,true);                         //copy number
+
+
+
+
+   
+  Lead_LV5->SetVisAttributes(red);
+
+
+
+   // Define dimensions and materials
+G4double shieldThickness = 0.001*cm; // 10 microns
+G4double ppThickness = 0.0001*cm;    // 1 micrometer
+G4double coatingThickness = 0.00001*cm; // 0.1 micrometer
+G4double gasThickness = 0.3*cm; // 3mm for CF4 gas
+G4double size = 70*cm;
+
+// Loop for 100 iterations
+for (int i = 0; i < 1; ++i) {
+    // Calculate z position for this iteration
+    G4double zStart = 112.0*cm + i*0.5*cm ; // Adjust z position for each iteration
+
+    // Create and place shield (polyethylene)
+    auto shield = new G4Box("shield", size/2, size/2, shieldThickness/2);
+    auto lShield = new G4LogicalVolume(shield, polyethylene, "Shield");
+
+    auto pShield = new G4PVPlacement(0,
+                                      G4ThreeVector(0.*cm, 0.*cm, zStart),
+                                      lShield,
+                                      "Shield",
+                                      fLBox,
+                                      false,
+                                      0, true);
+
+    // Create and place polypropylene foil
+    G4Box* foilSolid = new G4Box("foilSolid", size/2, size/2, ppThickness/2);
+    G4LogicalVolume* PPCoating = new G4LogicalVolume(foilSolid, PP, "PPCoating");
+
+    G4double zFoil = zStart + shieldThickness + ppThickness/2; // Place foil right after shield
+    G4PVPlacement* foilCoating = new G4PVPlacement(0,
+                                                   G4ThreeVector(0.*cm, 0.*cm, zFoil),
+                                                   PPCoating,
+                                                   "PPCoating",
+                                                   fLBox,
+                                                   false,
+                                                   0, true);
+
+    PPCoating->SetVisAttributes(yellow);
+
+    // Create and place aluminum coating
+    G4Box* coatingSolid = new G4Box("coatingSolid", size/2, size/2, coatingThickness/2);
+    G4LogicalVolume* lCoating = new G4LogicalVolume(coatingSolid, Aluminium, "AluminiumCoating");
+
+    G4double zCoating = zFoil + ppThickness/2 + coatingThickness/2; // Place aluminum coating after foil
+    auto pCoating = new G4PVPlacement(0,
+                                      G4ThreeVector(0.*cm, 0.*cm, zCoating),
+                                      lCoating,
+                                      "AluminiumCoating",
+                                      fLBox,
+                                      false,
+                                      0, true);
+
+    lCoating->SetVisAttributes(red);
+
+    // Create and place CF4 gas
+    G4Box* sScore = new G4Box("sScore", size/2, size/2, gasThickness/2);
+    G4LogicalVolume* fLScore = new G4LogicalVolume(sScore, CF4, "fLScore");
+
+    G4double zGas = zCoating + coatingThickness/2 + gasThickness/2; // Place CF4 gas after coating
+    auto fPScore = new G4PVPlacement(0,
+                                     G4ThreeVector(0.*cm, 0.*cm, zGas),
+                                     fLScore,
+                                     "fPScore",
+                                     fLBox,
+                                     false,
+                                     0, true);
+
+    //fScoringVolume_1 = fLScore;
+    // After creating each scoring volume, push it to the vector
+    fScoringVolumes.push_back(fLScore);
+
+
+    // Place a second aluminum coating
+    G4Box* coatingSolid2 = new G4Box("coatingSolid2", size/2, size/2, coatingThickness/2);
+    G4LogicalVolume* lCoating2 = new G4LogicalVolume(coatingSolid2, Aluminium, "AluminiumCoating2");
+
+    G4double zCoating2 = zGas + gasThickness/2 + coatingThickness/2; // Place second aluminum coating
+    auto pCoating2 = new G4PVPlacement(0,
+                                       G4ThreeVector(0.*cm, 0.*cm, zCoating2),
+                                       lCoating2,
+                                       "AluminiumCoating2",
+                                       fLBox,
+                                       false,
+                                       0, true);
+
+    lCoating2->SetVisAttributes(red);
+
+    // Place a second polypropylene foil
+    G4Box* foilSolid2 = new G4Box("foilSolid2", size/2, size/2, ppThickness/2);
+    G4LogicalVolume* PPCoating2 = new G4LogicalVolume(foilSolid2, PP, "PPCoating2");
+
+    G4double zFoil2 = zCoating2 + coatingThickness/2 + ppThickness/2; // Place second polypropylene foil
+    G4PVPlacement* foilCoating2 = new G4PVPlacement(0,
+                                                    G4ThreeVector(0.*cm, 0.*cm, zFoil2),
+                                                    PPCoating2,
+                                                    "PPCoating2",
+                                                    fLBox,
+                                                    false,
+                                                    0, true);
+
+    PPCoating2->SetVisAttributes(yellow);
+
+
+    //surfaces
+
+    // surface reflecting
+    G4OpticalSurface* oppac_Al_gas = new G4OpticalSurface("Reflecting");
+    oppac_Al_gas->SetModel(unified);
+    oppac_Al_gas->SetType(dielectric_metal);
+    oppac_Al_gas->SetFinish(polished);
+    G4LogicalBorderSurface* oppac_1 = new G4LogicalBorderSurface("oppac_1",fPScore,pCoating2,oppac_Al_gas);
+    G4LogicalBorderSurface* oppac_2 = new G4LogicalBorderSurface("oppac_2",fPScore,pCoating,oppac_Al_gas);
+    
+  
+}
+
+
+
   return fPBox;
 }
 
@@ -1042,7 +1066,7 @@ void DetectorConstruction::ConstructSDandField()
   G4SDManager* SDman = G4SDManager::GetSDMpointer();
   SDman->SetVerboseLevel(0);
 
-  //Define Multi-Detector and Register 
+  //Define Multi-Detector and Register
   //--------------------------------------------------------------------------------------------
   G4MultiFunctionalDetector* det = new G4MultiFunctionalDetector("IonPro");
   SDman->AddNewDetector(det);
