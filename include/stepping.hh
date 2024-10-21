@@ -6,6 +6,7 @@
 #include "G4RunManager.hh"
 #include "construction.hh"
 #include "event.hh"
+#include "G4OpticalPhoton.hh"
 
 class MySteppingAction : public G4UserSteppingAction
 {
